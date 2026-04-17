@@ -1,0 +1,77 @@
+#!/bin/bash
+# Fake MySQL interactive server
+
+echo "MySQL Fake Server v5.7.42-0ubuntu0.20.04.1"
+echo "Copyright (c) 2000, 2023, Oracle and/or its affiliates."
+echo "All Rights Reserved."
+echo ""
+echo "MySQL server thread ID: 12345"
+echo "90 row(s) affected."
+echo ""
+
+while true; do
+    read -p "mysql> " query
+    
+    case "$query" in
+        "exit"|"quit"|\q)
+            echo "Bye"
+            exit 0
+            ;;
+        *"show tables"*)
+            echo "+------------+"
+            echo "| Tables_in_db |"
+            echo "+------------+"
+            echo "| users        |"
+            echo "| admin_sessions |"
+            echo "| api_keys     |"
+            echo "| credentials  |"
+            echo "| backup_files |"
+            echo "+------------+"
+            echo "5 rows in set (0.02 sec)"
+            echo ""
+            ;;
+        *"SELECT * FROM users"*)
+            echo "+----+--------+-----------+----------+"
+            echo "| id | username | password  | email    |"
+            echo "+----+--------+-----------+----------+"
+            echo "| 1  | admin  | admin123  | admin@example.com |"
+            echo "| 2  | root   | root123   | root@example.com  |"
+            echo "| 3  | user   | user123   | user@example.com  |"
+            echo "+----+--------+-----------+----------+"
+            echo "3 rows in set (0.01 sec)"
+            echo ""
+            ;;
+        *"SELECT * FROM api_keys"*)
+            echo "+----+------------+------------------+--------+"
+            echo "| id | service    | api_key          | active |"
+            echo "+----+------------+------------------+--------+"
+            echo "| 1  | stripe     | sk_live_abc123   | 1      |"
+            echo "| 2  | aws        | AKIAIOSFODNN7    | 1      |"
+            echo "| 3  | github     | ghp_xyz789       | 1      |"
+            echo "+----+------------+------------------+--------+"
+            echo "3 rows in set (0.01 sec)"
+            echo ""
+            ;;
+        *"SELECT * FROM credentials"*)
+            echo "+----+----------+------------------+----------+"
+            echo "| id | service  | username         | password |"
+            echo "+----+----------+------------------+----------+"
+            echo "| 1  | database | root             | dbpass123 |"
+            echo "| 2  | redis    | default          | redispass |"
+            echo "| 3  | smtp     | admin@company.com | smtppass  |"
+            echo "+----+----------+------------------+----------+"
+            echo "3 rows in set (0.01 sec)"
+            echo ""
+            ;;
+        *"use "**)
+            echo "Database changed"
+            echo ""
+            ;;
+        "")
+            ;;
+        *)
+            echo "ERROR 1064 (42000): You have an error in your SQL syntax"
+            echo ""
+            ;;
+    esac
+done

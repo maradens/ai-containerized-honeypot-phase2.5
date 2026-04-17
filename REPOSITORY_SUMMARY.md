@@ -2,10 +2,10 @@
 
 ## Quick Stats
 
-- **Total Files**: 32
-- **Total Size**: ~350 KB
-- **Languages**: Python, Markdown, Dockerfile
-- **Main Components**: 7 core scripts, 5 analysis tools, 6 injection scripts, 4 test scripts
+- **Total Files**: 34
+- **Total Size**: ~360 KB
+- **Languages**: Python, Markdown, Bash, Dockerfile
+- **Main Components**: 7 core scripts, 5 analysis tools, 6 injection scripts, 4 test scripts, 2 utility scripts
 
 ---
 
@@ -48,6 +48,10 @@ ai-containerized-honeypot-phase2.5/
 │   ├── test_ssh_bot.py         # SSH bot test (4 KB)
 │   ├── manual_test.py          # Manual testing (4 KB)
 │   └── test_persistent.py      # Persistence test (4 KB)
+│
+├── Utility Scripts (2 files)
+│   ├── health_check.sh         # Health monitoring & restore (7 KB)
+│   └── add_accounts.sh         # Add ubuntu/admin users (2 KB)
 │
 └── Helper Scripts (6 files)
     ├── monitor_auth_inject.py  # Auth monitoring (8 KB)
@@ -151,23 +155,27 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Deploy
-python container_manager.py deploy 2225
+# Deploy (Production: port 22, Testing: port 2225)
+python container_manager.py deploy 22
 
 # Access
-ssh root@localhost -p 2225  # Password: password123
+ssh root@localhost -p 22  # Password: password123
 
 # Test
 python test_bot.py 30
 
-# Analyze
-python behavioral_analyzer.py
-python ttp_analyzer.py
-python cross_correlation_analyzer.py
-
-# Schedule maintenance
-python container_manager.py schedule
+# Analyze (MANUAL ONLY - No continuous monitoring)
+python attack_logger.py scan      # Scan and show stats
+python behavioral_analyzer.py      # Bot vs Human
+python ttp_analyzer.py            # MITRE ATT&CK
+python cross_correlation_analyzer.py  # Long-term patterns
 ```
+
+**⚠️ IMPORTANT:** All monitoring is MANUAL. No cron jobs or background processes. Run scripts when you want to check.
+
+**Database Location:** `~/ai-containerized-honeypot-phase2.5/data/attacks.db`
+
+**Your Test IP:** Filter out your own IP when analyzing real attacks (e.g., 111.94.104.82)
 
 ---
 

@@ -100,7 +100,56 @@ python attack_logger.py monitor   # Continuous monitoring
 
 ## Fake Services Reference
 
+### ⚠️ **Important: Service Outputs Must Look Realistic**
+
+**All fake services have been updated to NOT include "Fake" in output.**
+
+**Example - MySQL:**
+```bash
+# CORRECT (attacker sees this):
+$ mysql --version
+mysql  Ver 15.1 Distrib 10.0.39-MariaDB, for debian-linux-gnu (x86_64) using  EditLine wrapper
+
+# WRONG (gives away honeypot):
+$ mysql --version
+MySQL Fake Server v5.7.42-0ubuntu0.20.04.1
+```
+
+**If you see "Fake" text, see DEPLOYMENT_ISSUES.md Issue #16 for fixes.**
+
+---
+
+### User Accounts Available
+
+The honeypot includes **8 pre-configured user accounts** for attackers to discover:
+
+| Username | Password | Purpose |
+|---------|---------|---------|
+| root | password123 | Superuser access |
+| ubuntu | ubuntu | Common Ubuntu default |
+| admin | password | Generic admin account |
+| developer | Dev@123456 | Developer with fake projects |
+| webmaster | (locked) | Service account (recon only) |
+| backup | (locked) | Service account (recon only) |
+| deploy | (locked) | CI/CD account (recon only) |
+| gnats | (system) | System account (Ubuntu default) |
+
+**All user accounts have access to the same fake data:**
+- AWS credentials in `~/.aws/credentials`
+- SSH keys in `~/.ssh/id_rsa`
+- Git credentials in `~/.git-credentials`
+- Kubernetes configs in `~/.kube/config`
+- Database dumps in `/backup/`
+- And more...
+
+---
+
 ### MySQL (Interactive)
+
+**Version Output** (realistic MariaDB):
+```bash
+mysql  Ver 15.1 Distrib 10.0.39-MariaDB, for debian-linux-gnu (x86_64)
+```
 
 **Commands**:
 ```sql
@@ -246,6 +295,32 @@ IP B: [root, admin, user, test, ...]
 ---
 
 ## Troubleshooting
+
+### "Fake" Text Visible (CRITICAL - Fixes Honeypot Detection)
+
+**Symptom**:
+```bash
+$ mysql --version
+MySQL Fake Server v5.7.42
+
+$ netstat -tulpn
+Active Internet connections (w/o servers)
+```
+
+**Root Cause**: Service scripts contain "Fake" or giveaway text in output
+
+**Impact**: Attackers immediately know it's a honeypot
+
+**Solution**: See **DEPLOYMENT_ISSUES.md Issue #16** for complete fix
+
+**Quick Fix**:
+```bash
+docker exec -i honeypot-manual-test tee /usr/local/bin/mysql > /dev/null << 'EOF'
+#!/bin/bash
+echo "mysql  Ver 15.1 Distrib 10.0.39-MariaDB, for debian-linux-gnu (x86_64)"
+EOF
+docker exec honeypot-manual-test chmod +x /usr/local/bin/mysql
+```
 
 ### Container Won't Start
 
