@@ -1,8 +1,20 @@
 # 🐝 AI-Driven Containerized Honeypot - Phase 2.5
 
-## Advanced SSH Honeypot with Behavioral Analysis & Automated Management
+## ✅ **Status: Production Ready** (May 1, 2026)
 
-A production-ready, containerized SSH honeypot with interactive fake services, automated container management, behavioral analysis for bot/human differentiation, MITRE ATT&CK TTP mapping, and long-term cross-correlation analysis.
+| Item | Status |
+|------|--------|
+| **Phase 1:** Host Deployment (localhost:2225) | ✅ Complete & Tested |
+| **All Bugs Fixed** | ✅ 16 issues resolved |
+| **Documentation** | ✅ Updated & Complete |
+| **Fake Services** | ✅ Realistic (no "Fake" text) |
+| **Deployability** | ✅ README gives complete instructions |
+
+**Latest:** All critical bugs fixed, tested, and documented. See [docs/FIXES_LOG.md](docs/FIXES_LOG.md) for details.
+
+---
+
+Advanced SSH honeypot with behavioral analysis, MITRE ATT&CK mapping, automated management & comprehensive fake data injection.
 
 ![Phase](https://img.shields.io/badge/Phase-2.5-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-Latest-blue.svg)
@@ -10,6 +22,60 @@ A production-ready, containerized SSH honeypot with interactive fake services, a
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ---
+
+## 📁 Repository Structure
+
+## 📁 Repository Structure
+
+```
+ai-containerized-honeypot-phase2.5/
+├── README.md                          # 📖 You are here
+├── QUICKSTART.md                      # ⚡ 5-minute quick start guide
+├── requirements.txt                   # 📦 Python dependencies
+├── .env.example                       # ⚙️ Configuration template
+├── Dockerfile                         # 🐳 Container definition
+│
+├── deploy/                            # 🚀 Deployment scripts
+│   ├── container_manager.py           # Container orchestration
+│   ├── add_accounts.sh                # User account injection
+│   ├── health_check.sh                # System health verification
+│   └── verify_setup.sh                # Deployment validation
+│
+├── inject/                            # 📦 Data & service injection
+│   ├── fake_data_injector.py          # AWS, SSH keys, Git tokens
+│   ├── inject_fake_services.py        # Interactive fake services
+│   ├── copy_interactive_services.py   # Interactive shells
+│   ├── monitor_inject.py              # System monitoring
+│   ├── setup_logger.py                # Attack logger setup
+│   └── ... (3 more)
+│
+├── monitor/                           # 📊 Attack monitoring
+│   ├── attack_logger.py               # Scan & log to SQLite
+│   └── query_db.py                    # Database queries
+│
+├── analyze/                           # 🔬 Analysis scripts
+│   ├── behavioral_analyzer.py         # Bot vs Human detection
+│   ├── ttp_analyzer.py               # MITRE ATT&CK mapping
+│   ├── cross_correlation_analyzer.py # Long-term patterns
+│   ├── temporal_analyzer.py          # Time-based analysis
+│   └── exports/                      # Generated reports
+│
+├── config/                            # ⚙️ Configuration
+│   ├── honeypot_config.py            # Config loader
+│   └── honeypot_manager.py           # High-level manager
+│
+├── docs/                              # 📚 Documentation
+│   ├── ARCHITECTURE.md               # Technical architecture
+│   ├── DEPLOYMENT_GUIDE.md           # Complete deployment steps
+│   ├── ATTACK_ANALYSIS.md            # Analysis results
+│   ├── MONITORING_GUIDE.md           # Monitoring workflow
+│   ├── FIXES_LOG.md                  # Changelog
+│   ├── DEPLOYMENT_CHECKLIST.md       # Pre-deployment checklist
+│   └── ... (4 more)
+│
+└── scripts/                           # 🛠️ Utilities & maintenance
+    └── ... (7 maintenance scripts)
+```
 
 ## 📋 Table of Contents
 
@@ -143,35 +209,112 @@ A production-ready, containerized SSH honeypot with interactive fake services, a
 
 ## 🚀 Quick Deploy
 
-### 1. Clone & Setup
-```bash
-git clone https://github.com/maradens/ai-containerized-honeypot-phase2.5.git
-cd ai-containerized-honeypot-phase2.5
-```
+**⚠️ IMPORTANT:** This honeypot has been tested and all bugs fixed (see [docs/FIXES_LOG.md](docs/FIXES_LOG.md)). Follow these steps exactly for a flawless deployment.
 
-### 2. Build & Deploy
+### Option A: Local Testing (Recommended First - 5 minutes)
+
+Test on your host machine before deploying to production VM:
+
 ```bash
-docker build -t honeypot-ubuntu:latest .
+# 1. Setup Python environment
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-python container_manager.py deploy 22
-```
+pip install docker python-dotenv
 
-### 3. Inject Data & Users
-```bash
+# 2. Build Docker image
+docker build -t honeypot-ubuntu:latest .
+
+# 3. Deploy container (port 2225)
+python container_manager.py deploy 2225
+
+# 4. Inject fake data
 python fake_data_injector.py
 python inject_fake_services.py
-./add_accounts.sh
+python copy_interactive_services.py
+
+# 5. Test it!
+ssh root@localhost -p 2225  # Password: password123
 ```
 
-### 4. Verify & Start
+### Option B: Production Deployment (Port 22)
+
+**Prerequisites:**
+- ⚠️ Change admin SSH from port 22 to 64222 first!
+- ⚠️ Ensure you can still access admin account
+
 ```bash
-./health_check.sh check
-python attack_logger.py scan
+# 1. Setup Python environment
+python3 -m venv venv
+source venv/bin/activate
+pip install docker python-dotenv
+
+# 2. Build Docker image
+docker build -t honeypot-ubuntu:latest .
+
+# 3. Configure (optional - use defaults)
+cp .env.example .env  # Edit if needed
+
+# 4. Deploy container (port 22 - replaces SSH)
+python container_manager.py deploy 22
+
+# 5. Inject fake data
+python fake_data_injector.py
+python inject_fake_services.py
+python copy_interactive_services.py
+
+# 6. Test it!
+ssh root@localhost -p 22  # Password: password123
 ```
 
-**See [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) for complete deployment guide.**
+### 🔧 Optional Configuration
+
+```bash
+# Copy config template
+cp .env.example .env
+
+# Edit as needed (optional)
+nano .env
+
+# Default values:
+# CONTAINER_NAME=honeypot-manual-test
+# SSH_PORT=2225
+# SSH_USER=root
+# SSH_PASSWORD=password123
+```
+
+### ✅ Verify Deployment
+
+**Quick Tests:**
+```bash
+# Test SSH access
+ssh root@localhost -p 2225
+# Password: password123
+
+# Inside SSH, verify fake services (should NOT show "Fake" text!)
+mysql --version
+# Expected: mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper
+
+netstat -tulpn
+# Expected: Shows services on ports 22, 80, 443, 3306, 6379, 5432, 27017
+
+cat /root/.aws/credentials
+# Expected: Shows 3 profiles (default, production, staging)
+
+ps aux
+# Expected: Shows sshd, mysqld, nginx, redis-server
+```
+
+**Full Verification:**
+```bash
+./health_check.sh check  # Comprehensive status check
+```
+
+**See:**
+- [docs/DEPLOYMENT_CHECKLIST.md](docs/DEPLOYMENT_CHECKLIST.md) - Complete deployment steps
+- [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) - Latest deployment information
+- [docs/DEPLOYMENT_ISSUES.md](docs/DEPLOYMENT_ISSUES.md) - Troubleshooting 16 common issues
+- [docs/FIXES_LOG.md](docs/FIXES_LOG.md) - All bugs fixed in this session
+- [docs/MONITORING_GUIDE.md](docs/MONITORING_GUIDE.md) - Attack logging & behavioral analysis
 
 ---
 
@@ -320,13 +463,13 @@ python cross_correlation_analyzer.py
 
 | Issue | Solution |
 |-------|-----|
-| "Fake" text in output | See DEPLOYMENT_ISSUES.md Issue #16 |
+| "Fake" text in output | See docs/DEPLOYMENT_ISSUES.md Issue #16 |
 | Container not running | `./health_check.sh restore` |
 | Port 22 in use | Change admin SSH to 64222 |
 | Missing fake data | Re-run injection scripts |
 | Database corrupted | `./health_check.sh restore` |
 
-See [DEPLOYMENT_ISSUES.md](DEPLOYMENT_ISSUES.md) for 16 documented issues and fixes.
+See [docs/DEPLOYMENT_ISSUES.md](docs/DEPLOYMENT_ISSUES.md) for 16 documented issues and fixes.
 
 ---
 

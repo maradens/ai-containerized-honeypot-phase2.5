@@ -3,6 +3,7 @@
 Manual test script - creates honeypot step by step for debugging
 """
 
+from honeypot_config import get_config
 import docker
 import time
 
@@ -17,7 +18,7 @@ print("\n📦 Creating container...")
 container = client.containers.run(
     "ubuntu:22.04",
     command=["/bin/bash", "-c", "while true; do sleep 1; done"],
-    name="honeypot-manual-test",
+    name=get_config()["container_name"],
     ports={22: 2225},
     detach=True
 )

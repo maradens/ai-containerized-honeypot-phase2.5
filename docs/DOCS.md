@@ -112,7 +112,7 @@ mysql  Ver 15.1 Distrib 10.0.39-MariaDB, for debian-linux-gnu (x86_64) using  Ed
 
 # WRONG (gives away honeypot):
 $ mysql --version
-MySQL Fake Server v5.7.42-0ubuntu0.20.04.1
+mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper
 ```
 
 **If you see "Fake" text, see DEPLOYMENT_ISSUES.md Issue #16 for fixes.**
@@ -301,7 +301,7 @@ IP B: [root, admin, user, test, ...]
 **Symptom**:
 ```bash
 $ mysql --version
-MySQL Fake Server v5.7.42
+mysql Ver 8.0.36
 
 $ netstat -tulpn
 Active Internet connections (w/o servers)

@@ -3,6 +3,7 @@
 Fake Services Injector - Simple version using file copies
 """
 
+from honeypot_config import get_config
 import docker
 import tarfile
 import io
@@ -18,14 +19,15 @@ def create_tar_archive(file_path, arcname=None):
 
 def inject_services():
     client = docker.from_env()
-    container = client.containers.get("honeypot-manual-test")
+    container = client.containers.get(get_config()["container_name"])
     
     print("🎭 Injecting fake services...")
     
     # Fake MySQL command
     mysql_script = """#!/bin/bash
-echo "MySQL Fake Server v5.7.42-0ubuntu0.20.04.1"
+echo "mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper"
 echo "Copyright (c) 2000, 2023, Oracle and/or its affiliates."
+echo "All Rights Reserved."
 echo ""
 echo "Usage: mysql [OPTIONS] database_name"
 echo ""
@@ -88,18 +90,19 @@ fi
         container.exec_run(f"chmod +x {dest}")
         print(f"  ✓ {os.path.basename(dest)} installed")
     
-    # Create fake web content
-    web_content = {
-        '/var/www/html/admin/index.html': '<html><head><title>Admin Panel</title></head><body><h1>Admin Panel</h1><p>Server: production-01</p><p>Version: 2.4.1</p></body></html>',
-        '/var/www/html/api/status.json': '{"status":"ok","server":"production-01","version":"2.4.1","services":{"database":"connected","redis":"connected"},"users":1247}',
-    }
-    
-    for path, content in web_content.items():
-        with open('/tmp/web_file', 'w') as f:
-            f.write(content)
-        tar_data = create_tar_archive('/tmp/web_file', os.path.basename(path))
-        container.put_archive(os.path.dirname(path), tar_data)
-        print(f"  ✓ {os.path.basename(path)} created")
+    # Create fake web content (skipped - directories not in minimal container)
+    # web_content = {
+    #     '/var/www/html/admin/index.html': '<html><head><title>Admin Panel</title></head><body><h1>Admin Panel</h1><p>Server: production-01</p><p>Version: 2.4.1</p></body></html>',
+    #     '/var/www/html/api/status.json': '{"status":"ok","server":"production-01","version":"2.4.1","services":{"database":"connected","redis":"connected"},"users":1247}',
+    # }
+    #
+    # for path, content in web_content.items():
+    #     with open('/tmp/web_file', 'w') as f:
+    #         f.write(content)
+    #     tar_data = create_tar_archive('/tmp/web_file', os.path.basename(path))
+    #     container.put_archive(os.path.dirname(path), tar_data)
+    #     print(f"  ✓ {os.path.basename(path)} created")
+    print("  ⚠ Web content skipped (no web directories)")
     
     # Create fake cron jobs
     cron_content = """# Fake cron jobs

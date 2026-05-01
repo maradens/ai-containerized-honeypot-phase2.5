@@ -23,7 +23,7 @@ backups/
 .vscode/
 .idea/
 *.swp
-*.swo
+*.svo
 
 # OS
 .DS_Store
@@ -33,7 +33,20 @@ Thumbs.db
 test_*.py
 temp_*
 
-# JSON exports
-*_report.json
+# JSON exports (generated reports)
+*/exports/*.json
+*/_report.json
 ttp_report.json
 cross_correlation_report.json
+
+# Temporary analysis files
+analyze/*_report.json
+docs/*_analysis.md
+
+# Docker artifacts
+*.tar.gz
+docker-containers/
+
+# Shell history
+*.sh~
+*.bak

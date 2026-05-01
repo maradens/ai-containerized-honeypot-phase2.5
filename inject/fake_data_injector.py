@@ -4,6 +4,7 @@ Fake Data Injector - Phase 2
 Injects realistic fake data into honeypot containers to attract attackers
 """
 
+from honeypot_config import get_config
 import docker
 import os
 import random
@@ -12,7 +13,7 @@ from datetime import datetime, timedelta
 import json
 
 class FakeDataInjector:
-    def __init__(self, container_name="honeypot-manual-test"):
+    def __init__(self, container_name=get_config()["container_name"]):
         self.client = docker.from_env()
         self.container = self.client.containers.get(container_name)
         print(f"🎭 Fake Data Injector initialized for: {container_name}")
@@ -105,7 +106,22 @@ output = json
         for user in ["root", "admin", "developer", "deploy"]:
             cred_path = f"/home/{user}/.aws/credentials" if user != "root" else "/root/.aws/credentials"
             self.container.exec_run(f"mkdir -p {os.path.dirname(cred_path)}")
-            self.container.exec_run(f"echo '{aws_creds}' > {cred_path}")
+            
+            # Write using cat with heredoc-like approach
+            import io
+            import tarfile
+            
+            # Create tar with credentials file
+            tar_buffer = io.BytesIO()
+            with tarfile.open(fileobj=tar_buffer, mode='w') as tar:
+                data = io.BytesIO(aws_creds.encode())
+                ti = tarfile.TarInfo(name='credentials')
+                ti.size = len(aws_creds)
+                tar.addfile(ti, data)
+            
+            tar_buffer.seek(0)
+            self.container.put_archive(os.path.dirname(cred_path), tar_buffer.read())
+            self.container.exec_run(f"mv {os.path.dirname(cred_path)}/credentials {cred_path}")
             self.container.exec_run(f"chmod 600 {cred_path}")
             
         print(f"  ✓ Created AWS credentials for multiple users")

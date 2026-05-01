@@ -3,13 +3,14 @@
 Fixed Fake Data Injection - Uses docker cp for reliable file transfer
 """
 
+from honeypot_config import get_config
 import docker
 import os
 import shutil
 
 def inject_files():
     client = docker.from_env()
-    container = client.containers.get("honeypot-manual-test")
+    container = client.containers.get(get_config()["container_name"])
     
     print("🔧 Fixing fake data injection using docker cp...")
     

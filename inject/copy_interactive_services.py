@@ -3,6 +3,7 @@
 Copy interactive services to container
 """
 
+from honeypot_config import get_config
 import docker
 import tarfile
 import io
@@ -18,7 +19,7 @@ def create_tar_archive(file_path, arcname=None):
 
 def copy_services():
     client = docker.from_env()
-    container = client.containers.get("honeypot-manual-test")
+    container = client.containers.get(get_config()["container_name"])
     
     print("🎭 Copying interactive services...")
     

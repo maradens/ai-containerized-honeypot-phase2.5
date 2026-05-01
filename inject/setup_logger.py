@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+from honeypot_config import get_config
 import docker
 
 client = docker.from_env()
-container = client.containers.get("honeypot-manual-test")
+container = client.containers.get(get_config()["container_name"])
 
 # Create the logger script content
 logger_script = """#!/bin/bash

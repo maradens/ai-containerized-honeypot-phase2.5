@@ -7,11 +7,23 @@
 docker build -t honeypot-ubuntu:latest .
 ```
 
+### 1.5. Configure Honeypot (Optional - 30 seconds)
+```bash
+# Copy example config and customize
+cp .env.example .env
+nano .env  # Edit container name, ports, passwords if needed
+```
+
+**Default Configuration** (used if `.env` not present):
+- Container: `honeypot-manual-test`
+- Port: `2225`
+- SSH: `root@localhost:2225` with password `password123`
+
 ### 2. Setup Python (1 minute)
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install docker
+pip install docker python-dotenv
 ```
 
 ### 3. Deploy Container (1 minute)
@@ -61,7 +73,7 @@ cat /var/www/html/.env     # Should show fake secrets
 **Expected (CORRECT):**
 ```bash
 $ mysql --version
-mysql  Ver 15.1 Distrib 10.0.39-MariaDB, for debian-linux-gnu (x86_64)
+mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper
 ```
 
 **NOT Expected (WRONG - gives away honeypot):**
@@ -191,7 +203,7 @@ Last 7 days activity:
 ```bash
 # WRONG - gives away honeypot:
 $ mysql --version
-MySQL Fake Server v5.7.42
+mysql Ver 8.0.36
 
 # FIX - see DEPLOYMENT_ISSUES.md Issue #16
 docker exec -i honeypot-manual-test tee /usr/local/bin/mysql > /dev/null << 'EOF'

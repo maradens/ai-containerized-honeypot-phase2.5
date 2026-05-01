@@ -3,12 +3,13 @@
 Inject monitoring system into the running honeypot container
 """
 
+from honeypot_config import get_config
 import docker
 import sys
 
 # Connect to Docker
 client = docker.from_env()
-container = client.containers.get("honeypot-manual-test")
+container = client.containers.get(get_config()["container_name"])
 
 print("🔍 Injecting monitoring system...")
 
@@ -16,35 +17,36 @@ print("🔍 Injecting monitoring system...")
 container.exec_run("mkdir -p /var/log/attacks")
 print("  ✓ Created /var/log/attacks")
 
-# 2. Enable bash history logging
+# Enable bash history logging
 monitoring_script = """
-# Enable command logging
-echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
-echo "export HISTFILE=/var/log/attacks/bash_history" >> /root/.bashrc
-echo "export HISTSIZE=10000" >> /root/.bashrc
-echo "export HISTFILESIZE=20000" >> /root/.bashrc
-echo "export HISTTIMEFORMAT='%F %T '" >> /root/.bashrc
-
 # Create history file
 touch /var/log/attacks/bash_history
 chmod 600 /var/log/attacks/bash_history
 
-# Log all executed commands
-echo "" >> /root/.bashrc
-echo "# Log every command" >> /root/.bashrc
-echo 'trap "echo \\$(date +\\'%Y-%m-%d %H:%M:%S\\') - \\$COMMAND >> /var/log/attacks/command_log" DEBUG" >> /root/.bashrc
-
-# Log file access
-echo "" >> /root/.bashrc
-echo "# Log file access" >> /root/.bashrc
-echo 'alias cat="echo \$(date +%Y-%m-%d\ %H:%M:%S) - cat \$@ >> /var/log/attacks/file_access.log; command cat \$@ "' >> /root/.bashrc
-echo 'alias ls="echo \$(date +%Y-%m-%d\ %H:%M:%S) - ls \$@ >> /var/log/attacks/file_access.log; command ls \$@ "' >> /root/.bashrc
-echo 'alias vim="echo \$(date +%Y-%m-%d\ %H:%M:%S) - vim \$@ >> /var/log/attacks/file_access.log; command vim \$@ "' >> /root/.bashrc
-echo 'alias nano="echo \$(date +%Y-%m-%d\ %H:%M:%S) - nano \$@ >> /var/log/attacks/file_access.log; command nano \$@ "' >> /root/.bashrc
+# Log all executed commands (simple approach)
+export PROMPT_COMMAND='history -a'
+export HISTFILE=/var/log/attacks/bash_history
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTTIMEFORMAT='%F %T '
 """
 
 container.exec_run(monitoring_script)
 print("  ✓ Bash history logging enabled")
+
+# Now add to bashrc correctly (this persists for new sessions)
+bashrc_content = """
+# Enable command logging
+export PROMPT_COMMAND='history -a'
+export HISTFILE=/var/log/attacks/bash_history
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTTIMEFORMAT='%F %T '
+"""
+
+container.exec_run(f"echo '{bashrc_content}' >> /root/.bashrc")
+container.exec_run('chmod +x /root/.bashrc')
+print("  ✓ Bashrc updated for new sessions")
 
 # 3. Install auditd for system-level monitoring
 container.exec_run("apt-get update && apt-get install -y auditd > /dev/null 2>&1 || true")

@@ -4,12 +4,13 @@ Inject enhanced authentication monitoring into the honeypot container
 Captures: username/password attempts, login times, failed attempts
 """
 
+from honeypot_config import get_config
 import docker
 import sys
 
 # Connect to Docker
 client = docker.from_env()
-container = client.containers.get("honeypot-manual-test")
+container = client.containers.get(get_config()["container_name"])
 
 print("🔐 Injecting enhanced authentication monitoring...")
 

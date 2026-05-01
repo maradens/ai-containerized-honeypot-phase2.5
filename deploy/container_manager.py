@@ -3,6 +3,7 @@
 Container Manager - Reset, backup, and deploy honeypot containers
 """
 
+from honeypot_config import get_config
 import docker
 import json
 import os
@@ -10,7 +11,7 @@ from datetime import datetime
 import subprocess
 
 class ContainerManager:
-    def __init__(self, container_name="honeypot-manual-test", image_name="honeypot-ubuntu"):
+    def __init__(self, container_name=get_config()["container_name"], image_name="honeypot-ubuntu"):
         self.client = docker.from_env()
         self.container_name = container_name
         self.image_name = image_name

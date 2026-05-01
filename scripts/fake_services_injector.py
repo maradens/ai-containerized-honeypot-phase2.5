@@ -3,11 +3,12 @@
 Fake Services Injector - Makes single container appear like a full production server
 """
 
+from honeypot_config import get_config
 import docker
 import os
 
 class FakeServicesInjector:
-    def __init__(self, container_name="honeypot-manual-test"):
+    def __init__(self, container_name=get_config()["container_name"]):
         self.client = docker.from_env()
         self.container = self.client.containers.get(container_name)
         print(f"🎭 Fake Services Injector for: {container_name}")
@@ -18,8 +19,9 @@ class FakeServicesInjector:
         
         mysql_fake = '''#!/bin/bash
 # Fake MySQL server
-echo "MySQL Fake Server v5.7.42-0ubuntu0.20.04.1"
+echo "mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper"
 echo "Copyright (c) 2000, 2023, Oracle and/or its affiliates."
+echo "All Rights Reserved."
 echo ""
 echo "Usage: mysql [OPTIONS] database_name"
 echo ""

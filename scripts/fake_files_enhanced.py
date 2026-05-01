@@ -3,6 +3,7 @@
 Enhanced Fake Files - Add more realistic content
 """
 
+from honeypot_config import get_config
 import docker
 import tarfile
 import io
@@ -18,7 +19,7 @@ def create_tar_archive(file_path, arcname=None):
 
 def inject_enhanced_files():
     client = docker.from_env()
-    container = client.containers.get("honeypot-manual-test")
+    container = client.containers.get(get_config()["container_name"])
     
     print("📁 Injecting enhanced fake files...")
     

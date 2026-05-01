@@ -149,7 +149,7 @@ docker exec honeypot-manual-test psql --version
 **Expected Output:**
 ```
 -rwxrwxr-x 1 1000 1000 3832 Apr 17 02:07 /usr/local/bin/mysql
-MySQL Fake Server v5.7.42-0ubuntu0.20.04.1
+mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper
 ```
 
 **Fix Script:** Update `copy_interactive_services.py` to check container instead:
@@ -551,7 +551,7 @@ DB_PATH = os.environ.get('HONEYPOT_DB_PATH', './data/attacks.db')
 **Symptom:**
 ```
 $ mysql --version
-MySQL Fake Server v5.7.42-0ubuntu0.20.04.1
+mysql Ver 8.0.36-0ubuntu0.20.04.1 for Linux (x86_64) using EditLine wrapper
 
 $ netstat -tulpn
 Active Internet connections (w/o servers)

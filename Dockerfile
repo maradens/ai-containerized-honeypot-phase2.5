@@ -11,12 +11,13 @@ RUN apt-get update && apt-get install -y \
     nano \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure SSH
-RUN mkdir /var/run/sshd && \
-    echo "root:password123" | chpasswd && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication no/' /etc/ssh/sshd_config
+# Configure SSH with password authentication
+RUN mkdir -p /var/run/sshd && \
+    echo 'root:password123' | chpasswd && \
+    sed -i 's/^#.*PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#.*PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/^#.*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
 
 # Expose SSH port
 EXPOSE 22

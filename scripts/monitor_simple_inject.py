@@ -3,11 +3,12 @@
 Inject simple authentication monitoring (non-intrusive)
 """
 
+from honeypot_config import get_config
 import docker
 
 # Connect to Docker
 client = docker.from_env()
-container = client.containers.get("honeypot-manual-test")
+container = client.containers.get(get_config()["container_name"])
 
 print("🔐 Injecting authentication monitoring.\\n")
 

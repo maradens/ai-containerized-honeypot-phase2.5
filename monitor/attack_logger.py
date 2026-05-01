@@ -4,6 +4,7 @@ Attack Logger - Logs honeypot attacks to external SQLite database
 Runs outside the container, captures data from Docker
 """
 
+from honeypot_config import get_config
 import docker
 import sqlite3
 import json
@@ -221,15 +222,13 @@ class AttackLogger:
             return None
             
     def parse_commands(self, container):
-        """Parse command logs from container"""
+        """Parse command logs from multiple sources"""
         try:
+            # Try command_log first (pipe-separated format)
             result = container.exec_run("cat /var/log/attacks/command_log 2>/dev/null", demux=True)
             output = result.output[0].decode() if result.output[0] else ""
             
-            if not output.strip():
-                print("  ℹ No commands logged yet")
-                return
-                
+            # Format: timestamp|user|command
             lines = output.strip().split('\n')
             logged = 0
             
@@ -237,24 +236,40 @@ class AttackLogger:
                 if not line.strip():
                     continue
                     
-                # Format: timestamp|user|command
                 parts = line.split('|', 2)
                 if len(parts) >= 3:
-                    timestamp = parts[0]
-                    username = parts[1]
-                    command = parts[2] if len(parts) > 2 else ""
-                    
-                    # Insert into database
-                    self.log_command(
-                        container.id[:12],
-                        username,
-                        command,
-                        timestamp
-                    )
+                    timestamp, username, command = parts[0], parts[1], parts[2]
+                    self.log_command(container.id[:12], username, command, timestamp)
                     logged += 1
             
-            print(f"  ✓ Logged {logged} commands")
+            if logged > 0:
+                print(f"  ✓ Logged {logged} commands from command_log")
+                
+            # Also check bash_history (space-separated format)
+            result2 = container.exec_run("cat /var/log/attacks/bash_history 2>/dev/null", demux=True)
+            output2 = result2.output[0].decode() if result2.output[0] else ""
             
+            lines2 = output2.strip().split('\n')
+            logged2 = 0
+            
+            for line in lines2:
+                if not line.strip():
+                    continue
+                # Format: YYYY-MM-DD HH:MM:SS username command...
+                parts = line.split(' ', 3)
+                if len(parts) >= 4:
+                    timestamp = f"{parts[0]} {parts[1]}"
+                    username = parts[2]
+                    command = parts[3]
+                    self.log_command(container.id[:12], username, command, timestamp)
+                    logged2 += 1
+            
+            if logged2 > 0:
+                print(f"  ✓ Logged {logged2} commands from bash_history")
+                
+            if logged == 0 and logged2 == 0:
+                print("  ℹ No commands logged yet")
+                
         except Exception as e:
             print(f"  ⚠ Error parsing commands: {e}")
             
@@ -285,7 +300,7 @@ class AttackLogger:
             # Silently fail for command logging
             pass
             
-    def scan_container_logs(self, container_name="honeypot-manual-test"):
+    def scan_container_logs(self, container_name=get_config()["container_name"]):
         """Scan a container and log all auth attempts and commands"""
         print(f"\n🔍 Scanning container: {container_name}")
         
@@ -409,7 +424,7 @@ class AttackLogger:
         except Exception as e:
             print(f"  ✗ Error exporting: {e}")
             
-    def monitor_container(self, container_name="honeypot-manual-test", interval=30):
+    def monitor_container(self, container_name=get_config()["container_name"], interval=30):
         """Continuously monitor container for new attacks"""
         print(f"\n👀 Starting continuous monitoring of {container_name}")
         print(f"   Checking every {interval} seconds")

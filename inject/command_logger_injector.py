@@ -3,12 +3,13 @@
 Command Logger Injector - Enables comprehensive command logging
 """
 
+from honeypot_config import get_config
 import docker
 import os
 
 def inject_command_logging():
     client = docker.from_env()
-    container = client.containers.get("honeypot-manual-test")
+    container = client.containers.get(get_config()["container_name"])
     
     print("📝 Injecting command logging system...")
     
